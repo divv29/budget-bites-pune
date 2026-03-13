@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block title %}{{ restaurant.name }} — Budget Bites Pune{% endblock %}
+
+{% block content %}
+
+<!-- Restaurant Hero -->
+<div class="restaurant-hero">
+  <div class="restaurant-hero-bg">
+    <img src="{{ restaurant.image_url }}&auto=format&fit=crop&w=1600" alt="{{ restaurant.name }}"
+         onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600'" />
+  </div>
+  <div class="container">
+    <div class="restaurant-hero-content">
+      <div class="restaurant-tags">
+        <span class="rtag">{{ restaurant.cuisine }}</span>
+        <span class="rtag">📍 {{ restaurant.area }}</span>
+        <span class="rtag">⭐ {{ restaurant.rating }}</span>
+        <span class="rtag" style="background: var(--gold); color: var(--bg); border-color: var(--gold);">{{ price_label }}</span>
+      </div>
+      <h1 class="restaurant-name-page">{{ restaurant.name }}</h1>
+      <div class="restaurant-sub">
+        <span>{{ restaurant.location }}</span>
+        {% if restaurant.opening_hours %}
+        <span>🕐 {{ restaurant.opening_hours }}</span>
+        {% endif %}
+        {% if restaurant.phone and restaurant.phone != 'N/A' %}
+        <span>📞 {{ restaurant.phone }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Strip -->
+<div class="info-strip">
+  <div class="container">
+    <div class="info-strip-inner">
+      <div class="info-item">
+        <span class="info-icon">⭐</span>
+        <div><div class="info-label">Rating</div><div class="info-val">{{ restaurant.rating }} / 5</div></div>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">💰</span>
+        <div><div class="info-label">Avg Bill for 2</div><div class="info-val">₹{{ restaurant.avg_price_for_two }}</div></div>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">🍴</span>
+        <div><div class="info-label">Cuisine</div><div class="info-val">{{ restaurant.cuisine }}</div></div>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">📍</span>
+        <div><div class="info-label">Area</div><div class="info-val">{{ restaurant.area }}</div></div>
+      </div>
+      {% if restaurant.opening_hours %}
+      <div class="info-item">
+        <span class="info-icon">🕐</span>
+        <div><div class="info-label">Hours</div><div class="info-val">{{ restaurant.opening_hours }}</div></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="section">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 3rem; align-items: start;">
+
+      <!-- Left: Description + Menu -->
+      <div>
+        {% if restaurant.description %}
+        <div style="margin-bottom: 3rem;">
+          <p class="subtitle" style="margin-bottom: 1rem;">About</p>
+          <p style="font-size: 1.05rem; color: var(--cream-dim); line-height: 1.85; max-width: 620px;">{{ restaurant.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Menu -->
+        {% if menu_by_category %}
+        <div class="menu-section" style="padding: 0;">
+          <p class="subtitle" style="margin-bottom: 1.25rem;">Menu</p>
+
+          <!-- Category tabs -->
+          <div class="menu-nav">
+            <button class="menu-cat-btn active" data-cat="all">All Items</button>
+            {% for category in menu_by_category.keys() %}
+            <button class="menu-cat-btn" data-cat="{{ category }}">{{ category }}</button>
+            {% endfor %}
+          </div>
+
+          {% for category, items in menu_by_category.items() %}
+          <div class="menu-category" data-category="{{ category }}">
+            <div class="menu-cat-title">{{ category }}</div>
+            <div class="menu-grid">
+              {% for item in items %}
+              <div class="menu-item">
+                <div class="menu-item-info">
+                  <div class="menu-item-name">
+                    {% if item.is_veg %}
+                    <span class="veg-dot"></span>
+                    {% else %}
+                    <span class="nonveg-dot"></span>
+                    {% endif %}
+                    {{ item.name }}
+                    {% if item.is_popular %}
+                    <span class="popular-badge">Popular</span>
+                    {% endif %}
+                  </div>
+                  {% if item.description %}
+                  <div class="menu-item-desc">{{ item.description }}</div>
+                  {% endif %}
+                </div>
+                <div class="menu-item-price">
+                  {% if item.price > 0 %}₹{{ item.price }}{% else %}Incl.{% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Admin: Add Menu Item -->
+        {% if current_user and current_user.is_admin %}
+        <div style="margin-top: 2rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem;">
+          <h3 style="font-family: var(--ff-display); margin-bottom: 1.5rem; color: var(--terracotta);">+ Add Menu Item</h3>
+          <form method="POST" action="{{ url_for('admin_add_menu_item', rid=restaurant.id) }}">
+            <div class="grid-2" style="gap: 1rem;">
+              <div class="form-group" style="margin: 0;">
+                <label>Item Name</label>
+                <input type="text" name="name" required />
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label>Price (₹)</label>
+                <input type="number" name="price" required min="0" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>Description</label>
+              <input type="text" name="description" />
+            </div>
+            <div class="grid-2" style="gap: 1rem; margin-top: 1rem;">
+              <div class="form-group" style="margin: 0;">
+                <label>Category</label>
+                <select name="category" required>
+                  <option>Starters</option>
+                  <option>Main Course</option>
+                  <option>Breads</option>
+                  <option>Desserts</option>
+                  <option>Drinks</option>
+                  <option>Snacks</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0; padding-top: 1.6rem; display: flex; gap: 1rem; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; text-transform: none; letter-spacing: 0;">
+                  <input type="checkbox" name="is_veg" checked /> Veg
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; text-transform: none; letter-spacing: 0;">
+                  <input type="checkbox" name="is_popular" /> Popular
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-gold" style="margin-top: 1.25rem;">Add Item</button>
+          </form>
+        </div>
+        {% endif %}
+
+        <!-- Reviews -->
+        <div style="margin-top: 4rem;">
+          <p class="subtitle" style="margin-bottom: 1.25rem;">Reviews</p>
+
+          {% if reviews %}
+          {% for review in reviews %}
+          <div class="review-card fade-up">
+            <div class="review-head">
+              <div>
+                <div class="reviewer-name">{{ review.user.username }}</div>
+                <div class="star-display">
+                  {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}<span style="color: var(--text-muted);">★</span>{% endfor %}
+                </div>
+              </div>
+              <div class="review-date">{{ review.created_at.strftime('%b %d, %Y') }}</div>
+            </div>
+            {% if review.comment %}
+            <div class="review-comment">{{ review.comment }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% else %}
+          <p style="color: var(--text-muted);">No reviews yet. Be the first!</p>
+          {% endif %}
+
+          {% if current_user %}
+          <div class="review-form" style="margin-top: 2rem;">
+            <h4 style="font-family: var(--ff-display); font-size: 1.5rem; margin-bottom: 1rem;">Leave a Review</h4>
+            <form method="POST" action="{{ url_for('add_review', restaurant_id=restaurant.id) }}">
+              <div class="form-group">
+                <label>Your Rating</label>
+                <div class="star-rating">
+                  {% for i in range(5, 0, -1) %}
+                  <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {% if i == 5 %}required{% endif %} />
+                  <label for="star{{ i }}">★</label>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Comment (optional)</label>
+                <textarea name="comment" rows="3" style="width: 100%; resize: vertical;"></textarea>
+              </div>
+              <button type="submit" class="btn btn-gold">Submit Review</button>
+            </form>
+          </div>
+          {% else %}
+          <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); text-align: center;">
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Login to leave a review</p>
+            <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Login</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div style="position: sticky; top: 5.5rem;">
+        <!-- Price Card -->
+        <div class="price-card fade-up">
+          <div class="price-card-label">Average bill for 2 people</div>
+          <div class="price-card-amount">₹{{ restaurant.avg_price_for_two }}</div>
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Category</div>
+            <div style="color: var(--gold); font-weight: 500; margin-top: 0.25rem;">{{ price_label }}</div>
+          </div>
+        </div>
+
+        <!-- Quick Info -->
+        <div style="background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem;">
+          <div style="font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.25rem;">Details</div>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted);">Address</div>
+              <div style="font-size: 0.88rem; margin-top: 0.25rem;">{{ restaurant.location }}</div>
+            </div>
+            {% if restaurant.phone and restaurant.phone != 'N/A' %}
+            <div>
+              <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted);">Phone</div>
+              <div style="font-size: 0.88rem; margin-top: 0.25rem;">{{ restaurant.phone }}</div>
+            </div>
+            {% endif %}
+            {% if restaurant.opening_hours %}
+            <div>
+              <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted);">Hours</div>
+              <div style="font-size: 0.88rem; margin-top: 0.25rem;">{{ restaurant.opening_hours }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if current_user and current_user.is_admin %}
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-direction: column;">
+          <a href="{{ url_for('admin_edit_restaurant', rid=restaurant.id) }}" class="btn btn-outline" style="text-align: center; justify-content: center;">Edit Restaurant</a>
+          <form method="POST" action="{{ url_for('admin_delete_restaurant', rid=restaurant.id) }}"
+                onsubmit="return confirm('Delete {{ restaurant.name }}? This cannot be undone.')">
+            <button type="submit" class="btn btn-danger" style="width: 100%; justify-content: center;">Delete Restaurant</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Related Restaurants -->
+{% if related %}
+<div class="section-sm" style="background: var(--bg-2); border-top: 1px solid var(--border);">
+  <div class="container">
+    <p class="subtitle" style="margin-bottom: 2rem;">More in {{ restaurant.area }}</p>
+    <div class="grid-3">
+      {% for r in related %}
+      <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="restaurant-card fade-up">
+        <div class="card-image" style="height: 160px;">
+          <img src="{{ r.image_url }}&auto=format&fit=crop&h=320" alt="{{ r.name }}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'" />
+          <span class="card-price-badge">₹{{ r.avg_price_for_two }}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-cuisine">{{ r.cuisine.split(',')[0] }}</span>
+            <span class="card-rating">
+              <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {{ r.rating }}
+            </span>
+          </div>
+          <div class="card-name" style="font-size: 1.1rem;">{{ r.name }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Responsive sidebar on mobile
+if (window.innerWidth < 768) {
+  const sidebar = document.querySelector('[style*="position: sticky"]');
+  if (sidebar) sidebar.style.position = 'static';
+}
+</script>
+{% endblock %}

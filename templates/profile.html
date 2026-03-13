@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Profile — Budget Bites Pune{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+  <div class="container">
+    <div class="profile-avatar">{{ user.username[0].upper() }}</div>
+    <div class="profile-username display">{{ user.username }}</div>
+    <div class="profile-since">Member since {{ user.created_at.strftime('%B %Y') }}</div>
+    <div style="margin-top: 0.75rem; color: var(--text-muted); font-size: 0.88rem;">{{ user.email }}</div>
+    {% if user.is_admin %}
+    <span style="display: inline-block; margin-top: 0.75rem; background: var(--terracotta); color: white; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 50px;">Admin</span>
+    {% endif %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 280px; gap: 3rem; align-items: start;">
+      <div>
+        <p class="subtitle" style="margin-bottom: 1.5rem;">My Reviews</p>
+        {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card fade-up" style="margin-bottom: 1rem;">
+          <div class="review-head">
+            <div>
+              <a href="{{ url_for('restaurant_detail', restaurant_id=review.restaurant_id) }}"
+                 style="font-family: var(--ff-display); font-size: 1.2rem; color: var(--white);">
+                {{ review.restaurant.name }}
+              </a>
+              <div class="star-display" style="margin-top: 0.3rem;">
+                {% for i in range(review.rating) %}★{% endfor %}
+                {% for i in range(5 - review.rating) %}<span style="color: var(--text-muted);">★</span>{% endfor %}
+              </div>
+            </div>
+            <div class="review-date">{{ review.created_at.strftime('%b %d, %Y') }}</div>
+          </div>
+          {% if review.comment %}
+          <div class="review-comment">{{ review.comment }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state" style="padding: 3rem 0;">
+          <div class="empty-state-icon">✍️</div>
+          <h3>No reviews yet</h3>
+          <p>Visit a restaurant page to leave your first review.</p>
+          <a href="{{ url_for('restaurants') }}" class="btn btn-gold">Explore Restaurants</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar -->
+      <div style="position: sticky; top: 5.5rem;">
+        <div class="price-card">
+          <div style="font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem;">Stats</div>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div>
+              <div style="font-family: var(--ff-display); font-size: 2.5rem; color: var(--cream); line-height: 1;">{{ reviews|length }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em;">Reviews Written</div>
+            </div>
+            {% if reviews %}
+            <div>
+              <div style="font-family: var(--ff-display); font-size: 2.5rem; color: var(--gold); line-height: 1;">
+                {{ "%.1f"|format(reviews|map(attribute='rating')|list|sum / reviews|length) }}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em;">Avg Rating Given</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline" style="width: 100%; margin-top: 1rem; justify-content: center; text-align: center;">Log Out</a>
+        {% if user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-gold" style="width: 100%; margin-top: 0.75rem; justify-content: center; text-align: center;">Admin Dashboard</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

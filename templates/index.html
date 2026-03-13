@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Budget Bites Pune — Discover Pune's Best Restaurants{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="subtitle">Pune's Food Discovery Platform</span>
+      </div>
+      <h1 class="display display-xl hero-title">
+        Eat Well,<br><em>Spend Smart</em>
+      </h1>
+      <p class="hero-desc">
+        Discover Pune's finest restaurants across every budget — from legendary Irani cafes to rooftop fine dining.
+      </p>
+
+      <!-- Search -->
+      <div style="position: relative; max-width: 600px;">
+        <div class="search-bar">
+          <input type="text" id="heroSearch" placeholder="Search restaurants, cuisine, area…" autocomplete="off" />
+          <button onclick="doSearch()">Search</button>
+        </div>
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div>
+          <span class="hero-stat-num" data-count="18" data-suffix="+">0+</span>
+          <span class="hero-stat-label">Restaurants</span>
+        </div>
+        <div>
+          <span class="hero-stat-num" data-count="8" data-suffix="">0</span>
+          <span class="hero-stat-label">Areas of Pune</span>
+        </div>
+        <div>
+          <span class="hero-stat-num" data-count="6" data-suffix=" Cuisines">0 Cuisines</span>
+          <span class="hero-stat-label">Available</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── Cuisine Quick Filter ──────────────────────────────── -->
+<section class="section-sm" style="background: var(--bg-2); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <p class="subtitle" style="margin-bottom: 1.5rem;">Browse by Cuisine</p>
+    <div class="cuisine-icons">
+      {% set cuisines_map = [
+        ('🍛', 'South Indian', 'South Indian'),
+        ('🫓', 'Irani & Cafe', 'Irani'),
+        ('🍔', 'American', 'American'),
+        ('🍝', 'Continental', 'Continental'),
+        ('🌏', 'Pan Asian', 'Asian'),
+        ('🌶️', 'Maharashtrian', 'Maharashtrian'),
+      ] %}
+      {% for emoji, label, filter in cuisines_map %}
+      <a href="{{ url_for('restaurants') }}?cuisine={{ filter }}" class="cuisine-card">
+        <div class="cuisine-emoji">{{ emoji }}</div>
+        <div class="cuisine-name">{{ label }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Restaurants ──────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="section-head split">
+      <div>
+        <p class="subtitle">Handpicked for You</p>
+        <h2 class="display display-md" style="margin-top: 0.5rem;">Featured<br><em>Restaurants</em></h2>
+      </div>
+      <a href="{{ url_for('restaurants') }}" class="btn btn-outline">View All →</a>
+    </div>
+
+    <div class="grid-3">
+      {% for r in featured %}
+      <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="restaurant-card fade-up" style="transition-delay: {{ loop.index0 * 0.1 }}s">
+        <div class="card-image">
+          <img src="{{ r.image_url }}&auto=format&fit=crop" alt="{{ r.name }}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'" />
+          {% if r.is_featured %}<span class="card-badge">Featured</span>{% endif %}
+          <span class="card-price-badge">₹{{ r.avg_price_for_two }} for 2</span>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-cuisine">{{ r.cuisine }}</span>
+            <span class="card-rating">
+              <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {{ r.rating }}
+            </span>
+          </div>
+          <div class="card-name">{{ r.name }}</div>
+          <div class="card-location">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ r.area }}
+          </div>
+          <div class="card-footer">
+            <div>
+              <div class="card-price-label">Avg bill for 2</div>
+              <div class="card-price-amt">₹{{ r.avg_price_for_two }}</div>
+            </div>
+            <div class="card-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Top Rated ──────────────────────────────────────────── -->
+<section class="section" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="section-head centered">
+      <p class="subtitle">By the Numbers</p>
+      <h2 class="display display-md" style="margin-top: 0.5rem;">Top Rated in <em>Pune</em></h2>
+      <p>Restaurants consistently loved by diners across the city</p>
+    </div>
+
+    <div class="grid-4">
+      {% for r in top_rated %}
+      <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="restaurant-card fade-up">
+        <div class="card-image" style="height: 180px;">
+          <img src="{{ r.image_url }}&auto=format&fit=crop&h=360" alt="{{ r.name }}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'" />
+          <span class="card-price-badge">₹{{ r.avg_price_for_two }}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-cuisine">{{ r.cuisine.split(',')[0] }}</span>
+            <span class="card-rating">
+              <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {{ r.rating }}
+            </span>
+          </div>
+          <div class="card-name" style="font-size: 1.15rem;">{{ r.name }}</div>
+          <div class="card-location">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ r.area }}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Price Ranges CTA ───────────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="section-head centered">
+      <p class="subtitle">Budget Finder</p>
+      <h2 class="display display-md" style="margin-top: 0.5rem;">Find by <em>Price Range</em></h2>
+    </div>
+    <div class="grid-4">
+      {% set price_ranges = [
+        ('₹', 'Under ₹300', 'Budget Friendly', 0, 300, '#4caf50'),
+        ('₹₹', '₹300–₹600', 'Moderate', 300, 600, '#c9a84c'),
+        ('₹₹₹', '₹600–₹1000', 'Premium', 600, 1000, '#c4613a'),
+        ('₹₹₹₹', 'Above ₹1000', 'Fine Dining', 1000, 9999, '#9b59b6'),
+      ] %}
+      {% for symbol, label, desc, pmin, pmax, color in price_ranges %}
+      <a href="{{ url_for('restaurants') }}?price_min={{ pmin }}&price_max={{ pmax }}"
+         class="restaurant-card fade-up" style="text-align: center; padding: 2.5rem 1.5rem;">
+        <div style="font-size: 2rem; color: {{ color }}; font-family: var(--ff-display); margin-bottom: 0.75rem;">{{ symbol }}</div>
+        <div style="font-family: var(--ff-display); font-size: 1.3rem; color: var(--white); margin-bottom: 0.4rem;">{{ label }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase;">{{ desc }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function doSearch() {
+  const val = document.getElementById('heroSearch').value.trim();
+  if (val) window.location.href = '/restaurants?search=' + encodeURIComponent(val);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Budget Bites Pune{% endblock %}</title>
+  <meta name="description" content="Discover Pune's best restaurants that fit your budget. Browse menus, compare prices, and find your next favourite dining spot." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='28'>🍽</text></svg>" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">Budget <span>Bites</span></div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash-msg {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Admin Bar -->
+{% if current_user and current_user.is_admin %}
+<div class="admin-bar">
+  <div class="container">
+    <div class="admin-bar-inner">
+      <span class="admin-badge">Admin Mode</span>
+      <div class="admin-links">
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_add_restaurant') }}">+ Add Restaurant</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="{{ url_for('index') }}" class="nav-logo">Budget <span>Bites</span> Pune</a>
+      <div class="nav-links" id="navLinks">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('restaurants') }}">Restaurants</a>
+        {% if current_user %}
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}" class="nav-btn">Sign Up</a>
+        {% endif %}
+      </div>
+      <div class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">Budget <span>Bites</span> Pune</div>
+        <p>Your guide to Pune's best restaurants at every price point. Discover hidden gems and beloved classics across the city.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="{{ url_for('restaurants') }}">All Restaurants</a></li>
+          <li><a href="{{ url_for('restaurants') }}?sort=price_asc">Budget Eats</a></li>
+          <li><a href="{{ url_for('restaurants') }}?sort=rating">Top Rated</a></li>
+          <li><a href="{{ url_for('restaurants') }}?cuisine=South+Indian">South Indian</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Areas</h4>
+        <ul>
+          <li><a href="{{ url_for('restaurants') }}?area=Koregaon+Park">Koregaon Park</a></li>
+          <li><a href="{{ url_for('restaurants') }}?area=Baner">Baner</a></li>
+          <li><a href="{{ url_for('restaurants') }}?area=Deccan">Deccan</a></li>
+          <li><a href="{{ url_for('restaurants') }}?area=Camp">Camp</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          {% if current_user %}
+          <li><a href="{{ url_for('profile') }}">My Profile</a></li>
+          <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          {% else %}
+          <li><a href="{{ url_for('login') }}">Login</a></li>
+          <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Budget Bites Pune · A PBL Project</p>
+      <p>Made with ♥ for Pune's food lovers</p>
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — Budget Bites Pune{% endblock %}
+
+{% block content %}
+<div style="padding-top: 5.5rem; background: var(--bg-2); border-bottom: 1px solid var(--border); padding-bottom: 3rem;">
+  <div class="container">
+    <span class="subtitle">Admin</span>
+    <h1 class="display display-lg" style="margin-top: 0.5rem;">Dashboard</h1>
+    <div style="display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap;">
+      <div style="background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; text-align: center;">
+        <div style="font-family: var(--ff-display); font-size: 2.5rem; color: var(--gold);">{{ restaurants|length }}</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted);">Restaurants</div>
+      </div>
+      <div style="background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 2rem; text-align: center;">
+        <div style="font-family: var(--ff-display); font-size: 2.5rem; color: var(--gold);">{{ users_count }}</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted);">Registered Users</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <p class="subtitle">All Restaurants</p>
+      <a href="{{ url_for('admin_add_restaurant') }}" class="btn btn-gold btn-sm">+ Add Restaurant</a>
+    </div>
+
+    <div style="overflow-x: auto; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius);">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Area</th>
+            <th>Cuisine</th>
+            <th>Rating</th>
+            <th>Price for 2</th>
+            <th>Featured</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in restaurants %}
+          <tr>
+            <td style="font-weight: 500; color: var(--white);">{{ r.name }}</td>
+            <td>{{ r.area }}</td>
+            <td>{{ r.cuisine }}</td>
+            <td style="color: var(--gold);">★ {{ r.rating }}</td>
+            <td>₹{{ r.avg_price_for_two }}</td>
+            <td>{% if r.is_featured %}<span style="color: #4caf50;">✓</span>{% else %}<span style="color: var(--text-muted);">—</span>{% endif %}</td>
+            <td>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="btn btn-outline btn-sm">View</a>
+                <a href="{{ url_for('admin_edit_restaurant', rid=r.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('admin_delete_restaurant', rid=r.id) }}"
+                      onsubmit="return confirm('Delete {{ r.name }}?')" style="display: inline;">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

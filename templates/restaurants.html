@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Restaurants — Budget Bites Pune{% endblock %}
+
+{% block content %}
+<div style="padding-top: 5.5rem; background: var(--bg-2); border-bottom: 1px solid var(--border); padding-bottom: 3rem;">
+  <div class="container">
+    <p class="subtitle" style="margin-bottom: 0.75rem;">Browse</p>
+    <h1 class="display display-lg">Pune's <em>Restaurants</em></h1>
+    <p style="color: var(--text-muted); margin-top: 0.75rem;">
+      {{ restaurants|length }} restaurant{{ 's' if restaurants|length != 1 else '' }} found
+    </p>
+  </div>
+</div>
+
+<div class="section-sm">
+  <div class="container">
+
+    <!-- Filter Bar -->
+    <div class="filter-bar fade-up">
+      <div class="filter-title">🔍 Filter &amp; Search</div>
+      <form method="GET" action="{{ url_for('restaurants') }}">
+        <div class="filter-row">
+          <div class="filter-group" style="flex: 2; min-width: 220px;">
+            <label>Search</label>
+            <input type="text" name="search" value="{{ search }}" placeholder="Restaurant, cuisine, area…" />
+          </div>
+          <div class="filter-group">
+            <label>Area</label>
+            <select name="area">
+              <option value="">All Areas</option>
+              {% for area in areas %}
+              <option value="{{ area }}" {% if selected_area == area %}selected{% endif %}>{{ area }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Cuisine</label>
+            <select name="cuisine">
+              <option value="">All Cuisines</option>
+              {% for cuisine in cuisines %}
+              <option value="{{ cuisine }}" {% if selected_cuisine == cuisine %}selected{% endif %}>{{ cuisine }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group" style="min-width: 120px;">
+            <label>Max Price (₹)</label>
+            <input type="number" name="price_max" placeholder="e.g. 600" value="{{ request.args.get('price_max', '') }}" />
+          </div>
+          <div class="filter-group" style="min-width: 110px;">
+            <label>Min Rating</label>
+            <select name="rating">
+              <option value="">Any</option>
+              <option value="4.5" {% if request.args.get('rating') == '4.5' %}selected{% endif %}>4.5+</option>
+              <option value="4.0" {% if request.args.get('rating') == '4.0' %}selected{% endif %}>4.0+</option>
+              <option value="3.5" {% if request.args.get('rating') == '3.5' %}selected{% endif %}>3.5+</option>
+            </select>
+          </div>
+          <div class="filter-group" style="min-width: 130px;">
+            <label>Sort By</label>
+            <select name="sort">
+              <option value="rating" {% if request.args.get('sort','rating') == 'rating' %}selected{% endif %}>Top Rated</option>
+              <option value="price_asc" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Price: Low–High</option>
+              <option value="price_desc" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Price: High–Low</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-gold btn-sm">Apply</button>
+            <a href="{{ url_for('restaurants') }}" class="btn btn-outline btn-sm">Reset</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick Tags -->
+    <div class="tags" style="margin-bottom: 2rem;">
+      <span class="tag {% if not selected_area and not selected_cuisine %}active{% endif %}"
+            onclick="location.href='{{ url_for('restaurants') }}'">All</span>
+      <span class="tag {% if request.args.get('price_max') == '300' %}active{% endif %}"
+            onclick="location.href='{{ url_for('restaurants') }}?price_max=300'">₹ Under ₹300</span>
+      <span class="tag {% if request.args.get('price_max') == '600' %}active{% endif %}"
+            onclick="location.href='{{ url_for('restaurants') }}?price_max=600'">₹₹ Under ₹600</span>
+      <span class="tag {% if request.args.get('rating') == '4.5' %}active{% endif %}"
+            onclick="location.href='{{ url_for('restaurants') }}?rating=4.5'">⭐ 4.5+</span>
+      {% for area in areas[:5] %}
+      <span class="tag {% if selected_area == area %}active{% endif %}"
+            onclick="location.href='{{ url_for('restaurants') }}?area={{ area }}'">📍 {{ area }}</span>
+      {% endfor %}
+    </div>
+
+    <!-- Results Grid -->
+    {% if restaurants %}
+    <div class="grid-3">
+      {% for r in restaurants %}
+      <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="restaurant-card fade-up">
+        <div class="card-image">
+          <img src="{{ r.image_url }}&auto=format&fit=crop&h=440" alt="{{ r.name }}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800'" />
+          {% if r.is_featured %}<span class="card-badge">Featured</span>{% endif %}
+          <span class="card-price-badge">₹{{ r.avg_price_for_two }} for 2</span>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-cuisine">{{ r.cuisine.split(',')[0] }}</span>
+            <span class="card-rating">
+              <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {{ r.rating }}
+            </span>
+          </div>
+          <div class="card-name">{{ r.name }}</div>
+          <div class="card-location">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ r.location }}
+          </div>
+          <div class="card-footer">
+            <div>
+              <div class="card-price-label">Avg bill for 2</div>
+              <div class="card-price-amt">₹{{ r.avg_price_for_two }}</div>
+            </div>
+            <div class="card-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🍽</div>
+      <h3>No restaurants found</h3>
+      <p>Try adjusting your filters or search terms.</p>
+      <a href="{{ url_for('restaurants') }}" class="btn btn-gold">Clear Filters</a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
